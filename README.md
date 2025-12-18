@@ -1,1 +1,1 @@
-# finai_project-Kostyukova
+# goit-algo-fp
