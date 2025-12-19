@@ -1,11 +1,68 @@
-from task4_binary_heap.binary_heap import heap_to_tree, draw_tree
+import uuid
+import networkx as nx
+import matplotlib.pyplot as plt
+from collections import deque
+
+
+class Node:
+    def __init__(self, key, color="#000000"):
+        self.left = None
+        self.right = None
+        self.val = key
+        self.color = color
+        self.id = str(uuid.uuid4())
+
+
+def heap_to_tree(heap):
+    if not heap:
+        return None
+
+    nodes = [Node(value) for value in heap]
+
+    for i in range(len(heap)):
+        left = 2 * i + 1
+        right = 2 * i + 2
+
+        if left < len(heap):
+            nodes[i].left = nodes[left]
+        if right < len(heap):
+            nodes[i].right = nodes[right]
+
+    return nodes[0]
+
+
+def add_edges(graph, node, pos, x=0, y=0, layer=1):
+    if node:
+        graph.add_node(node.id, color=node.color, label=node.val)
+
+        if node.left:
+            graph.add_edge(node.id, node.left.id)
+            l = x - 1 / 2**layer
+            pos[node.left.id] = (l, y - 1)
+            add_edges(graph, node.left, pos, l, y - 1, layer + 1)
+
+        if node.right:
+            graph.add_edge(node.id, node.right.id)
+            r = x + 1 / 2**layer
+            pos[node.right.id] = (r, y - 1)
+            add_edges(graph, node.right, pos, r, y - 1, layer + 1)
+
+
+def draw_tree(root, title):
+    tree = nx.DiGraph()
+    pos = {root.id: (0, 0)}
+    add_edges(tree, root, pos)
+
+    colors = [node[1]["color"] for node in tree.nodes(data=True)]
+    labels = {node[0]: node[1]["label"] for node in tree.nodes(data=True)}
+
+    plt.figure(figsize=(8, 5))
+    plt.title(title)
+    nx.draw(tree, pos, labels=labels, arrows=False, node_size=2500, node_color=colors)
+    plt.show()
 
 
 def generate_colors(n, base_color="#1296F0"):
-    """
-    Генерує n кольорів від темного до світлого відтінку на основі base_color.
-    """
-    # преобразуем base_color в RGB
     base_color = base_color.lstrip("#")
     r, g, b = (
         int(base_color[0:2], 16),
@@ -15,15 +72,12 @@ def generate_colors(n, base_color="#1296F0"):
 
     colors = []
     for i in range(n):
-        factor = 0.5 + 0.5 * (i / max(1, n - 1))  # Від темного 0.5 до світлого 1.0
-        new_r = min(int(r * factor), 255)
-        new_g = min(int(g * factor), 255)
-        new_b = min(int(b * factor), 255)
-        colors.append(f"#{new_r:02X}{new_g:02X}{new_b:02X}")
+        factor = 0.4 + 0.6 * (i / max(1, n - 1))
+        colors.append(f"#{int(r*factor):02X}{int(g*factor):02X}{int(b*factor):02X}")
     return colors
 
 
-def dfs_order(root):
+def dfs(root):
     stack = [root]
     order = []
 
@@ -31,16 +85,13 @@ def dfs_order(root):
         node = stack.pop()
         if node:
             order.append(node)
-            # Спочатку правий, потім лівий, щоб лівий відвідувався раніше.
             stack.append(node.right)
             stack.append(node.left)
+
     return order
 
 
-from collections import deque
-
-
-def bfs_order(root):
+def bfs(root):
     queue = deque([root])
     order = []
 
@@ -50,25 +101,24 @@ def bfs_order(root):
             order.append(node)
             queue.append(node.left)
             queue.append(node.right)
+
     return order
 
 
-def assign_colors_by_order(order, base_color="#1296F0"):
+def color_nodes(order, base_color):
     colors = generate_colors(len(order), base_color)
     for node, color in zip(order, colors):
         node.color = color
 
 
 heap = [0, 4, 1, 5, 10, 3]
-root = heap_to_tree(heap)  # Використовуємо функцію з попередніх завдань.
 
-# DFS
-dfs_order = dfs_order(root)
-assign_colors_by_order(dfs_order, "#FF0000")
-draw_tree(root)
-
-# BFS
 root = heap_to_tree(heap)
-bfs_order = bfs_order(root)
-assign_colors_by_order(bfs_order, "#0000FF")
-draw_tree(root)
+dfs_order = dfs(root)
+color_nodes(dfs_order, "#1296F0")
+draw_tree(root, "DFS traversal")
+
+root = heap_to_tree(heap)
+bfs_order = bfs(root)
+color_nodes(bfs_order, "#1296F0")
+draw_tree(root, "BFS traversal")
