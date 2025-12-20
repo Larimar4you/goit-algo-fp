@@ -1,5 +1,5 @@
 class Node:
-    """Node class for a singly linked list"""
+    """Node class for a singly linked listj"""
 
     def __init__(self, data):
         self.data = data

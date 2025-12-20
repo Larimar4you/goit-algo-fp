@@ -19,7 +19,7 @@ def monte_carlo_dice_simulation(num_trials=100000):
     return probabilities
 
 
-# Запуск симуляції
+# Запуск
 trials = 100_000
 mc_probabilities = monte_carlo_dice_simulation(trials)
 
