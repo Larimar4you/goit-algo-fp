@@ -20,6 +20,21 @@ def simulate_dice_rolls(num_rolls):
     return probabilities
 
 
+analytical = {
+    2: 1 / 36,
+    3: 2 / 36,
+    4: 3 / 36,
+    5: 4 / 36,
+    6: 5 / 36,
+    7: 6 / 36,
+    8: 5 / 36,
+    9: 4 / 36,
+    10: 3 / 36,
+    11: 2 / 36,
+    12: 1 / 36,
+}
+
+
 def plot_probabilities(probabilities, num_rolls):
     sums = list(probabilities.keys())
     probs = list(probabilities.values())
@@ -38,13 +53,16 @@ def plot_probabilities(probabilities, num_rolls):
 
 
 if __name__ == "__main__":
-    # Різна кількість симуляцій для демонстрації збіжності
     for accuracy in [100, 1000, 10000, 100000]:
         probabilities = simulate_dice_rolls(accuracy)
 
         print(f"\nКількість кидків: {accuracy}")
-        print(f"{'Сума':<5}{'Ймовірність'}")
+        print("Порівняння з аналітичними значеннями:")
+
         for s in range(2, 13):
-            print(f"{s:<5}{probabilities[s]:.4f}")
+            print(
+                f"{s}: Monte-Carlo={probabilities[s]:.4f}, "
+                f"Analytical={analytical[s]:.4f}"
+            )
 
         plot_probabilities(probabilities, accuracy)
