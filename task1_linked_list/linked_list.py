@@ -1,141 +1,142 @@
 class Node:
-    """Node class for a singly linked listj"""
-
-    def __init__(self, data):
+    def __init__(self, data=None):
         self.data = data
         self.next = None
 
 
 class LinkedList:
-    """Singly linked list"""
-
     def __init__(self):
         self.head = None
 
-    def append(self, data):
-        """Append a new node to the end of the list"""
+    def insert_at_beginning(self, data):
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+
+    def insert_at_end(self, data):
         new_node = Node(data)
         if not self.head:
             self.head = new_node
+        else:
+            cur = self.head
+            while cur.next:
+                cur = cur.next
+            cur.next = new_node
+
+    def insert_after(self, prev_node: Node, data):
+        if prev_node is None:
+            print("Попереднього вузла не існує.")
             return
-        last = self.head
-        while last.next:
-            last = last.next
-        last.next = new_node
+        new_node = Node(data)
+        new_node.next = prev_node.next
+        prev_node.next = new_node
+
+    def delete_node(self, key: int):
+        cur = self.head
+        if cur and cur.data == key:
+            self.head = cur.next
+            return
+        prev = None
+        while cur and cur.data != key:
+            prev = cur
+            cur = cur.next
+        if cur is None:
+            return
+        prev.next = cur.next
+
+    def search_element(self, data: int) -> Node | None:
+        cur = self.head
+        while cur:
+            if cur.data == data:
+                return cur
+            cur = cur.next
+        return None
 
     def print_list(self):
-        """Print all nodes in the list"""
-        current = self.head
-        while current:
-            print(current.data, end=" -> ")
-            current = current.next
+        cur = self.head
+        while cur:
+            print(cur.data, end=" -> ")
+            cur = cur.next
         print("None")
 
     def reverse(self):
-        """Reverse the linked list"""
         prev = None
         current = self.head
-
         while current:
             next_node = current.next
             current.next = prev
             prev = current
             current = next_node
-
         self.head = prev
 
-    def sort(self):
-        """Sort the linked list using insertion sort"""
-        if not self.head or not self.head.next:
-            return
+    def get_middle(self, head):
+        if head is None:
+            return head
+        slow = head
+        fast = head
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+        return slow
 
-        sorted_head = None
-        current = self.head
-
-        while current:
-            next_node = current.next
-            sorted_head = self._sorted_insert(sorted_head, current)
-            current = next_node
-
-        self.head = sorted_head
-
-    def _sorted_insert(self, head, node):
-        """Insert node into sorted list"""
-        if not head or node.data < head.data:
-            node.next = head
-            return node
-
-        current = head
-        while current.next and current.next.data < node.data:
-            current = current.next
-
-        node.next = current.next
-        current.next = node
-        return head
-
-
-def merge_sorted_lists(l1, l2):
-    """Merge two sorted linked lists"""
-    dummy = Node(0)
-    tail = dummy
-
-    while l1 and l2:
-        if l1.data <= l2.data:
-            tail.next = l1
-            l1 = l1.next
+    def sorted_merge(self, a, b):
+        if not a:
+            return b
+        if not b:
+            return a
+        if a.data <= b.data:
+            result = a
+            result.next = self.sorted_merge(a.next, b)
         else:
-            tail.next = l2
-            l2 = l2.next
-        tail = tail.next
+            result = b
+            result.next = self.sorted_merge(a, b.next)
+        return result
 
-    tail.next = l1 if l1 else l2
-    return dummy.next
+    def merge_sort(self, head):
+        if not head or not head.next:
+            return head
+        middle = self.get_middle(head)
+        next_to_middle = middle.next
+        middle.next = None
+
+        left = self.merge_sort(head)
+        right = self.merge_sort(next_to_middle)
+
+        sorted_list = self.sorted_merge(left, right)
+        return sorted_list
+
+    def merge_sorted_lists(self, list1, list2):
+        self.head = self.sorted_merge(list1.head, list2.head)
 
 
 if __name__ == "__main__":
-    ll = LinkedList()
-    ll.append(5)
-    ll.append(2)
-    ll.append(8)
-    ll.append(1)
+    first_list = LinkedList()
+    first_list.insert_at_beginning(5)
+    first_list.insert_at_beginning(10)
+    first_list.insert_at_beginning(15)
+    first_list.insert_at_end(20)
+    first_list.insert_at_end(25)
 
-    print("Original list:")
-    ll.print_list()
+    print("Перший список:")
+    first_list.print_list()
 
-    ll.sort()
-    print("Sorted list:")
-    ll.print_list()
+    first_list.reverse()
+    print("Після реверсу:")
+    first_list.print_list()
 
-    ll.reverse()
-    print("Reversed list:")
-    ll.print_list()
+    first_list.head = first_list.merge_sort(first_list.head)
+    print("Після сортування:")
+    first_list.print_list()
 
-    list1 = LinkedList()
-    list1.append(1)
-    list1.append(3)
-    list1.append(5)
-    list1.sort()
+    second_list = LinkedList()
+    second_list.insert_at_beginning(7)
+    second_list.insert_at_beginning(2)
+    second_list.insert_at_end(30)
 
-    list2 = LinkedList()
-    list2.append(2)
-    list2.append(4)
-    list2.append(6)
-    list2.sort()
+    print("Другий список:")
+    second_list.print_list()
 
     merged_list = LinkedList()
-    merged_list.head = merge_sorted_lists(list1.head, list2.head)
-
-    print("Merged sorted lists:")
+    merged_list.merge_sorted_lists(first_list, second_list)
+    print("Об’єднаний відсортований список:")
     merged_list.print_list()
-
-
-"""
-Original list:
-5 -> 2 -> 8 -> 1 -> None
-Sorted list:
-1 -> 2 -> 5 -> 8 -> None
-Reversed list:
-8 -> 5 -> 2 -> 1 -> None
-Merged sorted lists:
-1 -> 2 -> 3 -> 4 -> 5 -> 6 -> None
-"""
